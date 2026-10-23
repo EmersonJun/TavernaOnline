@@ -3,6 +3,7 @@ package br.com.tavernaonline.common;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -25,9 +26,19 @@ public class GlobalExceptionHandler {
         return construir(HttpStatus.CONFLICT, ex.getMessage(), req);
     }
 
+    @ExceptionHandler(AcessoNegadoException.class)
+    public ResponseEntity<ErroResposta> tratarAcessoNegado(AcessoNegadoException ex, HttpServletRequest req) {
+        return construir(HttpStatus.FORBIDDEN, ex.getMessage(), req);
+    }
+
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErroResposta> tratarCredenciaisInvalidas(BadCredentialsException ex, HttpServletRequest req) {
         return construir(HttpStatus.UNAUTHORIZED, "Credenciais invalidas", req);
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ErroResposta> tratarConflitoDeVersao(ObjectOptimisticLockingFailureException ex, HttpServletRequest req) {
+        return construir(HttpStatus.CONFLICT, "A ficha foi alterada por outra pessoa. Recarregue e tente novamente", req);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
