@@ -15,8 +15,8 @@ O TavernaOnline permite que um mestre crie campanhas, convide jogadores por cód
 ## ✨ Funcionalidades
 
 - [x] Cadastro e login com JWT
-- [ ] Campanhas com convite por código
-- [ ] Fichas de personagem editáveis
+- [x] Campanhas com convite por código
+- [x] Fichas de personagem editáveis (backend)
 - [ ] Sala de sessão em tempo real (WebSocket/STOMP)
 - [ ] Rolagem de dados com notação (`2d6+3`) e rolagens secretas do mestre
 - [ ] Tracker de iniciativa e controle de turnos
