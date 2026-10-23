@@ -1,0 +1,35 @@
+# ===== Java / Maven =====
+backend/target/
+*.class
+*.jar
+*.war
+*.log
+hs_err_pid*
+.mvn/wrapper/maven-wrapper.jar
+
+# ===== Node / Angular =====
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/coverage/
+npm-debug.log*
+yarn-error.log*
+
+# ===== IDEs =====
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+.settings/
+.project
+.classpath
+*.swp
+
+# ===== Sistema operacional =====
+.DS_Store
+Thumbs.db
+
+# ===== Variáveis de ambiente (NUNCA versionar segredos) =====
+.env
+*.env.local
+!.env.example
