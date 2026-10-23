@@ -27,11 +27,10 @@ fix(auth): retorna 401 quando o token JWT expira
 
 ## Branches
 
-- `main` — sempre estável, só recebe merge via Pull Request
-- `feat/<nome>` — uma branch por funcionalidade (ex.: `feat/motor-de-dados`)
-- `fix/<nome>`, `docs/<nome>`, `ci/<nome>` — idem
+- `main` — versão estável, recebe o merge final
+- `master` — branch de desenvolvimento onde todos os commits são feitos
 
-Fluxo: criar branch → commits pequenos → abrir PR → CI verde → merge (squash ou merge commit) → apagar a branch.
+Fluxo: commits na `master` → CI verde → merge da `master` na `main` ao final.
 
 ## Migrations (Flyway)
 
