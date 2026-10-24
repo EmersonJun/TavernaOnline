@@ -1,0 +1,97 @@
+<div class="row">
+  <mat-card style="flex: 1 1 320px">
+    <mat-card-header><mat-card-title>Nova campanha</mat-card-title></mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="formCriar" (ngSubmit)="criar()">
+        <mat-form-field class="full-width">
+          <mat-label>Nome</mat-label>
+          <input matInput formControlName="nome" />
+        </mat-form-field>
+        <mat-form-field class="full-width">
+          <mat-label>Sistema</mat-label>
+          <input matInput formControlName="sistema" placeholder="D&D 5e, Tormenta20..." />
+        </mat-form-field>
+        <mat-form-field class="full-width">
+          <mat-label>Descricao</mat-label>
+          <textarea matInput formControlName="descricao" rows="2"></textarea>
+        </mat-form-field>
+        <button mat-flat-button color="primary" [disabled]="formCriar.invalid">Criar</button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card style="flex: 1 1 320px">
+    <mat-card-header><mat-card-title>Entrar por convite</mat-card-title></mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="formEntrar" (ngSubmit)="entrar()">
+        <mat-form-field class="full-width">
+          <mat-label>Codigo de convite</mat-label>
+          <input matInput formControlName="codigoConvite" maxlength="8" style="text-transform: uppercase" />
+        </mat-form-field>
+        <button mat-flat-button color="accent" [disabled]="formEntrar.invalid">Entrar</button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<h2>Minhas campanhas</h2>
+
+@if (campanhas().length === 0) {
+  <p>Voce ainda nao participa de nenhuma campanha.</p>
+}
+
+@for (campanha of campanhas(); track campanha.id) {
+  <mat-card style="margin-bottom: 16px">
+    <mat-card-header>
+      <mat-card-title>{{ campanha.nome }}</mat-card-title>
+      <mat-card-subtitle>
+        {{ campanha.sistema }}
+        <mat-chip-set><mat-chip>{{ campanha.meuPapel }}</mat-chip></mat-chip-set>
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      @if (campanha.descricao) {
+        <p>{{ campanha.descricao }}</p>
+      }
+      @if (campanha.meuPapel === 'MESTRE') {
+        <p>Codigo de convite: <strong>{{ campanha.codigoConvite }}</strong></p>
+      }
+
+      <mat-accordion>
+        <mat-expansion-panel (opened)="carregarSessoes(campanha.id)">
+          <mat-expansion-panel-header>
+            <mat-panel-title>Sessoes</mat-panel-title>
+          </mat-expansion-panel-header>
+
+          @if (campanha.meuPapel === 'MESTRE') {
+            <form [formGroup]="formSessao" (ngSubmit)="criarSessao(campanha.id)" class="row">
+              <mat-form-field style="flex: 1">
+                <mat-label>Titulo da sessao</mat-label>
+                <input matInput formControlName="titulo" />
+              </mat-form-field>
+              <button mat-stroked-button [disabled]="formSessao.invalid">Criar sessao</button>
+            </form>
+          }
+
+          <mat-list>
+            @for (sessao of sessoesDe(campanha.id); track sessao.id) {
+              <mat-list-item>
+                <span matListItemTitle>#{{ sessao.numero }} — {{ sessao.titulo }}</span>
+                <span matListItemLine>{{ sessao.status }}</span>
+                <a mat-button color="primary" [routerLink]="['/sessoes', sessao.id, 'sala']">Entrar na sala</a>
+              </mat-list-item>
+            }
+          </mat-list>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </mat-card-content>
+    <mat-card-actions>
+      <a mat-button [routerLink]="['/campanhas', campanha.id, 'personagens']">
+        <mat-icon>person</mat-icon> Fichas
+      </a>
+      <a mat-button [routerLink]="['/campanhas', campanha.id, 'diario']">
+        <mat-icon>menu_book</mat-icon> Diario
+      </a>
+    </mat-card-actions>
+  </mat-card>
+}
