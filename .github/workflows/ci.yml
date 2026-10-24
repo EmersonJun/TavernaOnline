@@ -47,3 +47,27 @@ jobs:
       - name: Build e testes
         working-directory: backend
         run: mvn -B verify
+
+  frontend:
+    name: Frontend - build e testes
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configura Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Instala dependencias
+        working-directory: frontend
+        run: npm install
+
+      - name: Testes
+        working-directory: frontend
+        run: npm run test:ci
+
+      - name: Build de producao
+        working-directory: frontend
+        run: npm run build
