@@ -87,6 +87,13 @@ public class CampanhaService {
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Campanha nao encontrada"));
     }
 
+    @Transactional(readOnly = true)
+    public List<String> emailsDosMestres(UUID campanhaId) {
+        return participacaoRepository.findByCampanhaIdAndPapel(campanhaId, Papel.MESTRE).stream()
+                .map(p -> p.getUsuario().getEmail())
+                .toList();
+    }
+
     public void exigirParticipante(UUID campanhaId, UUID usuarioId) {
         if (!participacaoRepository.existsByUsuarioIdAndCampanhaId(usuarioId, campanhaId)) {
             throw new AcessoNegadoException("Voce nao participa desta campanha");

@@ -16,5 +16,7 @@ public interface ParticipacaoRepository extends JpaRepository<Participacao, UUID
 
     List<Participacao> findByCampanhaId(UUID campanhaId);
 
+    List<Participacao> findByCampanhaIdAndPapel(UUID campanhaId, Papel papel);
+
     List<Participacao> findByUsuarioId(UUID usuarioId);
 }
