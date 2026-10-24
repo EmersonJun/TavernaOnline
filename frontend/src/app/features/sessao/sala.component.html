@@ -1,0 +1,120 @@
+<div class="row">
+  <mat-card style="flex: 2 1 420px">
+    <mat-card-header><mat-card-title>Chat da sessao</mat-card-title></mat-card-header>
+    <mat-card-content>
+      <div style="max-height: 300px; overflow-y: auto; margin-bottom: 12px">
+        @for (mensagem of mensagens(); track mensagem.id) {
+          <p>
+            @if (mensagem.tipo === 'SISTEMA') {
+              <em>{{ mensagem.conteudo }}</em>
+            } @else {
+              <strong>{{ mensagem.autorNome }}:</strong> {{ mensagem.conteudo }}
+            }
+          </p>
+        }
+      </div>
+      <form [formGroup]="formMensagem" (ngSubmit)="enviarMensagem()" class="row">
+        <mat-form-field style="flex: 1">
+          <mat-label>Mensagem</mat-label>
+          <input matInput formControlName="conteudo" />
+        </mat-form-field>
+        <button mat-flat-button color="primary" [disabled]="formMensagem.invalid">Enviar</button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card style="flex: 1 1 220px">
+    <mat-card-header><mat-card-title>Online</mat-card-title></mat-card-header>
+    <mat-card-content>
+      <mat-chip-set>
+        @for (nome of online(); track nome) {
+          <mat-chip>{{ nome }}</mat-chip>
+        }
+      </mat-chip-set>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<div class="row">
+  <mat-card style="flex: 1 1 320px">
+    <mat-card-header><mat-card-title>Rolagem de dados</mat-card-title></mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="formRolagem" (ngSubmit)="rolar()">
+        <div class="row">
+          <mat-form-field style="flex: 1">
+            <mat-label>Notacao</mat-label>
+            <input matInput formControlName="notacao" placeholder="2d6+3" />
+          </mat-form-field>
+          <mat-form-field style="flex: 1">
+            <mat-label>Motivo</mat-label>
+            <input matInput formControlName="motivo" placeholder="Ataque com espada" />
+          </mat-form-field>
+        </div>
+        <mat-checkbox formControlName="secreta">Rolagem secreta (apenas mestre)</mat-checkbox>
+        <div>
+          <button mat-flat-button color="primary" [disabled]="formRolagem.invalid">Rolar</button>
+        </div>
+      </form>
+
+      <div style="max-height: 240px; overflow-y: auto; margin-top: 12px">
+        @for (rolagem of rolagens(); track rolagem.id) {
+          <p>
+            <strong>{{ rolagem.autorNome }}</strong>
+            @if (rolagem.secreta) { <mat-icon style="vertical-align: middle">visibility_off</mat-icon> }
+            rolou <code>{{ rolagem.notacao }}</code>
+            = [{{ rolagem.resultados.join(', ') }}]
+            @if (rolagem.modificador !== 0) { ({{ rolagem.modificador > 0 ? '+' : '' }}{{ rolagem.modificador }}) }
+            → <strong>{{ rolagem.total }}</strong>
+            @if (rolagem.motivo) { <em>— {{ rolagem.motivo }}</em> }
+          </p>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card style="flex: 1 1 320px">
+    <mat-card-header><mat-card-title>Combate</mat-card-title></mat-card-header>
+    <mat-card-content>
+      @if (combate()?.combateAtivo) {
+        <p>Rodada <strong>{{ combate()?.rodadaAtual }}</strong></p>
+        <mat-list>
+          @for (combatente of combate()?.ordem ?? []; track combatente.id) {
+            <mat-list-item>
+              <span matListItemTitle>
+                @if (combatente.id === combate()?.participanteDaVezId) { ▶ }
+                {{ combatente.nome }}
+              </span>
+              <span matListItemLine>Iniciativa {{ combatente.iniciativa }}</span>
+            </mat-list-item>
+          }
+        </mat-list>
+        <div class="row">
+          <button mat-flat-button color="primary" (click)="proximoTurno()">Proximo turno</button>
+          <button mat-stroked-button (click)="encerrarCombate()">Encerrar combate</button>
+        </div>
+      } @else {
+        <form [formGroup]="formCombatente" (ngSubmit)="adicionarCombatente()" class="row">
+          <mat-form-field style="flex: 2">
+            <mat-label>Combatente</mat-label>
+            <input matInput formControlName="nome" />
+          </mat-form-field>
+          <mat-form-field style="flex: 1">
+            <mat-label>Iniciativa</mat-label>
+            <input matInput type="number" formControlName="iniciativa" />
+          </mat-form-field>
+          <button mat-icon-button type="submit" [disabled]="formCombatente.invalid">
+            <mat-icon>add</mat-icon>
+          </button>
+        </form>
+        <mat-list>
+          @for (entrada of combatentes(); track $index) {
+            <mat-list-item>{{ entrada.nome }} — {{ entrada.iniciativa }}</mat-list-item>
+          }
+        </mat-list>
+        @if (combatentes().length > 0) {
+          <button mat-flat-button color="accent" (click)="iniciarCombate()">Iniciar combate</button>
+        }
+      }
+    </mat-card-content>
+  </mat-card>
+</div>
