@@ -20,7 +20,7 @@ O TavernaOnline permite que um mestre crie campanhas, convide jogadores por cód
 - [ ] Sala de sessão em tempo real (WebSocket/STOMP)
 - [ ] Rolagem de dados com notação (`2d6+3`) e rolagens secretas do mestre
 - [ ] Tracker de iniciativa e controle de turnos
-- [ ] Diário da campanha
+- [x] Diário da campanha (backend)
 - [ ] Indicação de jogadores online
 
 ## 🛠️ Stack

@@ -1,5 +1,6 @@
 package br.com.tavernaonline.common;
 
+import br.com.tavernaonline.rolagem.motor.NotacaoInvalidaException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AcessoNegadoException.class)
     public ResponseEntity<ErroResposta> tratarAcessoNegado(AcessoNegadoException ex, HttpServletRequest req) {
         return construir(HttpStatus.FORBIDDEN, ex.getMessage(), req);
+    }
+
+    @ExceptionHandler(NotacaoInvalidaException.class)
+    public ResponseEntity<ErroResposta> tratarNotacaoInvalida(NotacaoInvalidaException ex, HttpServletRequest req) {
+        return construir(HttpStatus.BAD_REQUEST, ex.getMessage(), req);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
