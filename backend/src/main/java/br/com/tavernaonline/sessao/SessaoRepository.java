@@ -1,0 +1,13 @@
+package br.com.tavernaonline.sessao;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+import java.util.UUID;
+
+public interface SessaoRepository extends JpaRepository<Sessao, UUID> {
+
+    List<Sessao> findByCampanhaIdOrderByNumeroAsc(UUID campanhaId);
+
+    int countByCampanhaId(UUID campanhaId);
+}
