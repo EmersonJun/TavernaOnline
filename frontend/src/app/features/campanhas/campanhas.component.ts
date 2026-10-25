@@ -1,17 +1,15 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatListModule } from '@angular/material/list';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { CampanhaService } from '../../core/services/campanha.service';
 import { SessaoService } from '../../core/services/sessao.service';
-import { Campanha } from '../../core/models/campanha.model';
+import { Campanha, Participante } from '../../core/models/campanha.model';
 import { Sessao } from '../../core/models/sessao.model';
 
 @Component({
@@ -19,25 +17,29 @@ import { Sessao } from '../../core/models/sessao.model';
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    RouterLink,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatIconModule,
-    MatChipsModule,
-    MatExpansionModule,
-    MatListModule
+    MatIconModule
   ],
-  templateUrl: './campanhas.component.html'
+  templateUrl: './campanhas.component.html',
+  styleUrl: './campanhas.component.scss'
 })
 export class CampanhasComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly campanhaService = inject(CampanhaService);
   private readonly sessaoService = inject(SessaoService);
+  private readonly router = inject(Router);
+  private readonly snack = inject(MatSnackBar);
 
   protected readonly campanhas = signal<Campanha[]>([]);
-  protected readonly sessoesPorCampanha = signal<Record<string, Sessao[]>>({});
+  protected readonly sessoesDestaque = signal<Sessao[]>([]);
+  protected readonly participantesDestaque = signal<Participante[]>([]);
+  protected readonly mostrarForm = signal(false);
+
+  protected readonly destaque = computed(() => this.campanhas()[0] ?? null);
+  protected readonly outras = computed(() => this.campanhas().slice(1));
 
   protected readonly formCriar = this.fb.nonNullable.group({
     nome: ['', [Validators.required]],
@@ -49,16 +51,29 @@ export class CampanhasComponent implements OnInit {
     codigoConvite: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(8)]]
   });
 
-  protected readonly formSessao = this.fb.nonNullable.group({
-    titulo: ['', [Validators.required]]
-  });
-
   ngOnInit(): void {
+    const convite = this.lerConvitePendente();
+    if (convite) {
+      this.formEntrar.patchValue({ codigoConvite: convite });
+      this.mostrarForm.set(true);
+    }
     this.carregar();
   }
 
   carregar(): void {
-    this.campanhaService.listarMinhas().subscribe((lista) => this.campanhas.set(lista));
+    this.campanhaService.listarMinhas().subscribe((lista) => {
+      this.campanhas.set(lista);
+      const destaque = lista[0];
+      if (destaque) {
+        this.sessaoService.listar(destaque.id).subscribe((s) => this.sessoesDestaque.set(s));
+        this.campanhaService.listarParticipantes(destaque.id)
+          .subscribe((p) => this.participantesDestaque.set(p));
+      }
+    });
+  }
+
+  toggleForm(): void {
+    this.mostrarForm.update((v) => !v);
   }
 
   criar(): void {
@@ -72,6 +87,7 @@ export class CampanhasComponent implements OnInit {
       descricao: valor.descricao || null
     }).subscribe(() => {
       this.formCriar.reset();
+      this.mostrarForm.set(false);
       this.carregar();
     });
   }
@@ -83,27 +99,64 @@ export class CampanhasComponent implements OnInit {
     this.campanhaService.entrarPorCodigo(this.formEntrar.getRawValue().codigoConvite.toUpperCase())
       .subscribe(() => {
         this.formEntrar.reset();
+        this.mostrarForm.set(false);
         this.carregar();
       });
   }
 
-  carregarSessoes(campanhaId: string): void {
-    this.sessaoService.listar(campanhaId).subscribe((lista) => {
-      this.sessoesPorCampanha.update((atual) => ({ ...atual, [campanhaId]: lista }));
+  criarSessao(campanhaId: string): void {
+    const numero = this.sessoesDestaque().length + 1;
+    this.sessaoService.criar(campanhaId, `Sessão ${numero}`).subscribe((s) => {
+      this.sessoesDestaque.update((lista) => [...lista, s]);
+      this.router.navigate(['/sessoes', s.id, 'sala']);
     });
   }
 
-  criarSessao(campanhaId: string): void {
-    if (this.formSessao.invalid) {
+  abrirSala(campanha: Campanha): void {
+    const sessoes = this.sessoesDestaque();
+    const emAndamento = sessoes.find((s) => s.status === 'EM_ANDAMENTO');
+    const alvo = emAndamento ?? sessoes[sessoes.length - 1];
+    if (alvo) {
+      this.router.navigate(['/sessoes', alvo.id, 'sala']);
       return;
     }
-    this.sessaoService.criar(campanhaId, this.formSessao.getRawValue().titulo).subscribe(() => {
-      this.formSessao.reset();
-      this.carregarSessoes(campanhaId);
-    });
+    if (campanha.meuPapel === 'MESTRE') {
+      this.criarSessao(campanha.id);
+      return;
+    }
+    this.snack.open('O mestre ainda não abriu uma sessão.', 'Fechar', { duration: 4000 });
   }
 
-  sessoesDe(campanhaId: string): Sessao[] {
-    return this.sessoesPorCampanha()[campanhaId] ?? [];
+  verFichas(campanha: Campanha): void {
+    this.router.navigate(['/campanhas', campanha.id, 'personagens']);
+  }
+
+  abrirDiario(campanha: Campanha): void {
+    this.router.navigate(['/campanhas', campanha.id, 'diario']);
+  }
+
+  copiarCodigo(codigo: string): void {
+    try {
+      navigator.clipboard.writeText(codigo);
+      this.snack.open('Código copiado!', 'Fechar', { duration: 2500 });
+    } catch {
+      this.snack.open(`Código: ${codigo}`, 'Fechar', { duration: 4000 });
+    }
+  }
+
+  iniciais(nome: string): string {
+    return nome.trim().charAt(0).toUpperCase();
+  }
+
+  private lerConvitePendente(): string | null {
+    try {
+      const codigo = localStorage.getItem('taverna.convite');
+      if (codigo) {
+        localStorage.removeItem('taverna.convite');
+      }
+      return codigo;
+    } catch {
+      return null;
+    }
   }
 }

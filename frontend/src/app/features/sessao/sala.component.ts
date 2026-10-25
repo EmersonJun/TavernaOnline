@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -8,8 +8,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatListModule } from '@angular/material/list';
-import { MatChipsModule } from '@angular/material/chips';
 import { AuthService } from '../../core/auth/auth.service';
 import { WebsocketService } from '../../core/services/websocket.service';
 import { SessaoService } from '../../core/services/sessao.service';
@@ -21,16 +19,16 @@ import { Combate, Mensagem, Rolagem } from '../../core/models/sessao.model';
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    RouterLink,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatCheckboxModule,
-    MatListModule,
-    MatChipsModule
+    MatCheckboxModule
   ],
-  templateUrl: './sala.component.html'
+  templateUrl: './sala.component.html',
+  styleUrl: './sala.component.scss'
 })
 export class SalaComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
@@ -148,6 +146,22 @@ export class SalaComponent implements OnInit, OnDestroy {
 
   encerrarCombate(): void {
     this.combateService.encerrar(this.sessaoId).subscribe((c) => this.combate.set(c));
+  }
+
+  hora(iso: string | null): string {
+    if (!iso) {
+      return '';
+    }
+    const data = new Date(iso);
+    return data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  inicial(nome: string | null): string {
+    return (nome ?? '?').trim().charAt(0).toUpperCase();
+  }
+
+  abs(valor: number): number {
+    return Math.abs(valor);
   }
 
   ngOnDestroy(): void {

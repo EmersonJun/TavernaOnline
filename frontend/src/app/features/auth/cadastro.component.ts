@@ -1,7 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,44 +9,58 @@ import { AuthService } from '../../core/auth/auth.service';
 @Component({
   selector: 'app-cadastro',
   standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    RouterLink,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule
-  ],
+  imports: [ReactiveFormsModule, RouterLink, MatFormFieldModule, MatInputModule, MatButtonModule],
   template: `
-    <mat-card>
-      <mat-card-header>
-        <mat-card-title>Criar conta</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
+    <div class="tela">
+      <div class="form-box">
+        <h1 class="wordmark">Taverna<span class="on">Online</span></h1>
+        <h2 class="titulo">Criar conta de aventureiro</h2>
+        <p class="sub">Forje seu nome e junte-se à mesa.</p>
+
         <form [formGroup]="form" (ngSubmit)="cadastrar()">
-          <mat-form-field class="full-width">
-            <mat-label>Nome</mat-label>
-            <input matInput formControlName="nome" />
+          <label class="rot">Nome</label>
+          <mat-form-field class="full-width" appearance="fill">
+            <input matInput formControlName="nome" placeholder="Seu nome de aventureiro" />
           </mat-form-field>
-          <mat-form-field class="full-width">
-            <mat-label>E-mail</mat-label>
-            <input matInput type="email" formControlName="email" />
+
+          <label class="rot">E-mail</label>
+          <mat-form-field class="full-width" appearance="fill">
+            <input matInput type="email" formControlName="email" placeholder="voce@taverna.rpg" />
           </mat-form-field>
-          <mat-form-field class="full-width">
-            <mat-label>Senha (minimo 8 caracteres)</mat-label>
-            <input matInput type="password" formControlName="senha" />
+
+          <label class="rot">Senha (mínimo 8 caracteres)</label>
+          <mat-form-field class="full-width" appearance="fill">
+            <input matInput type="password" formControlName="senha" placeholder="••••••••••" />
           </mat-form-field>
-          <button mat-flat-button color="primary" class="full-width"
-                  [disabled]="form.invalid || carregando()">
-            Cadastrar
+
+          <button mat-flat-button class="full-width btn-grande" [disabled]="form.invalid || carregando()">
+            Forjar conta
           </button>
         </form>
-      </mat-card-content>
-      <mat-card-actions>
-        <a mat-button routerLink="/login">Ja tenho conta</a>
-      </mat-card-actions>
-    </mat-card>
-  `
+
+        <p class="novo">Já faz parte da mesa? <a routerLink="/login">Entrar</a></p>
+      </div>
+    </div>
+  `,
+  styles: [`
+    .tela {
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      padding: 40px;
+      background:
+        radial-gradient(700px 420px at 50% 0%, rgba(216,40,60,.08), transparent 70%),
+        #0c0c0e;
+      overflow-y: auto;
+    }
+    .form-box { width: 100%; max-width: 420px; }
+    .wordmark { font-family: 'Cinzel', serif; font-size: 30px; color: var(--cream); margin: 0 0 24px; }
+    .wordmark .on { color: var(--red); }
+    .titulo { font-family: 'Cinzel', serif; font-size: 24px; color: var(--cream); margin: 0 0 8px; }
+    .sub { color: var(--muted); margin: 0 0 24px; }
+    .rot { display: block; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin: 4px 0 2px; }
+    .btn-grande { height: 54px; margin-top: 10px; }
+    .novo { text-align: center; color: var(--muted); margin-top: 22px; }
+  `]
 })
 export class CadastroComponent {
   private readonly fb = inject(FormBuilder);

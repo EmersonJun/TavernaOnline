@@ -1,120 +1,118 @@
-<div class="row">
-  <mat-card style="flex: 2 1 420px">
-    <mat-card-header><mat-card-title>Chat da sessao</mat-card-title></mat-card-header>
-    <mat-card-content>
-      <div style="max-height: 300px; overflow-y: auto; margin-bottom: 12px">
-        @for (mensagem of mensagens(); track mensagem.id) {
-          <p>
-            @if (mensagem.tipo === 'SISTEMA') {
-              <em>{{ mensagem.conteudo }}</em>
-            } @else {
-              <strong>{{ mensagem.autorNome }}:</strong> {{ mensagem.conteudo }}
-            }
-          </p>
-        }
-      </div>
-      <form [formGroup]="formMensagem" (ngSubmit)="enviarMensagem()" class="row">
-        <mat-form-field style="flex: 1">
-          <mat-label>Mensagem</mat-label>
-          <input matInput formControlName="conteudo" />
-        </mat-form-field>
-        <button mat-flat-button color="primary" [disabled]="formMensagem.invalid">Enviar</button>
-      </form>
-    </mat-card-content>
-  </mat-card>
-
-  <mat-card style="flex: 1 1 220px">
-    <mat-card-header><mat-card-title>Online</mat-card-title></mat-card-header>
-    <mat-card-content>
-      <mat-chip-set>
-        @for (nome of online(); track nome) {
-          <mat-chip>{{ nome }}</mat-chip>
-        }
-      </mat-chip-set>
-    </mat-card-content>
-  </mat-card>
+<div class="sala-head">
+  <a class="voltar" routerLink="/campanhas"><mat-icon>chevron_left</mat-icon></a>
+  <div>
+    <h2 class="sh-title">Mesa ao vivo</h2>
+    <div class="sh-sub">Sessão · em andamento</div>
+  </div>
+  <span class="spacer"></span>
+  <span class="pill red"><span class="dot dot-red"></span> Ao vivo · WebSocket</span>
 </div>
 
-<div class="row">
-  <mat-card style="flex: 1 1 320px">
-    <mat-card-header><mat-card-title>Rolagem de dados</mat-card-title></mat-card-header>
-    <mat-card-content>
-      <form [formGroup]="formRolagem" (ngSubmit)="rolar()">
-        <div class="row">
-          <mat-form-field style="flex: 1">
-            <mat-label>Notacao</mat-label>
-            <input matInput formControlName="notacao" placeholder="2d6+3" />
-          </mat-form-field>
-          <mat-form-field style="flex: 1">
-            <mat-label>Motivo</mat-label>
-            <input matInput formControlName="motivo" placeholder="Ataque com espada" />
-          </mat-form-field>
-        </div>
-        <mat-checkbox formControlName="secreta">Rolagem secreta (apenas mestre)</mat-checkbox>
-        <div>
-          <button mat-flat-button color="primary" [disabled]="formRolagem.invalid">Rolar</button>
-        </div>
-      </form>
-
-      <div style="max-height: 240px; overflow-y: auto; margin-top: 12px">
-        @for (rolagem of rolagens(); track rolagem.id) {
-          <p>
-            <strong>{{ rolagem.autorNome }}</strong>
-            @if (rolagem.secreta) { <mat-icon style="vertical-align: middle">visibility_off</mat-icon> }
-            rolou <code>{{ rolagem.notacao }}</code>
-            = [{{ rolagem.resultados.join(', ') }}]
-            @if (rolagem.modificador !== 0) { ({{ rolagem.modificador > 0 ? '+' : '' }}{{ rolagem.modificador }}) }
-            → <strong>{{ rolagem.total }}</strong>
-            @if (rolagem.motivo) { <em>— {{ rolagem.motivo }}</em> }
-          </p>
+<div class="sala-grid">
+  <aside class="lateral">
+    <mat-card class="box">
+      <div class="box-head"><span class="eyebrow">À mesa</span><span class="muted">{{ online().length }} online</span></div>
+      <div class="online-lista">
+        @for (nome of online(); track nome) {
+          <div class="online-item">
+            <span class="av-mesa">{{ inicial(nome) }}<span class="dot dot-green st"></span></span>
+            <div>
+              <div class="om-nome">{{ nome }}</div>
+              <div class="om-papel">Aventureiro</div>
+            </div>
+          </div>
+        }
+        @if (online().length === 0) {
+          <p class="muted">Ninguém na sala ainda.</p>
         }
       </div>
-    </mat-card-content>
-  </mat-card>
+    </mat-card>
 
-  <mat-card style="flex: 1 1 320px">
-    <mat-card-header><mat-card-title>Combate</mat-card-title></mat-card-header>
-    <mat-card-content>
+    <mat-card class="box" [class.combate-ativo]="combate()?.combateAtivo">
+      <div class="box-head">
+        <span class="eyebrow">Combate</span>
+        @if (combate()?.combateAtivo) {
+          <span class="muted">Rodada <strong class="red-text">{{ combate()?.rodadaAtual }}</strong></span>
+        }
+      </div>
+
       @if (combate()?.combateAtivo) {
-        <p>Rodada <strong>{{ combate()?.rodadaAtual }}</strong></p>
-        <mat-list>
-          @for (combatente of combate()?.ordem ?? []; track combatente.id) {
-            <mat-list-item>
-              <span matListItemTitle>
-                @if (combatente.id === combate()?.participanteDaVezId) { ▶ }
-                {{ combatente.nome }}
-              </span>
-              <span matListItemLine>Iniciativa {{ combatente.iniciativa }}</span>
-            </mat-list-item>
+        <div class="iniciativa">
+          @for (c of combate()?.ordem ?? []; track c.id) {
+            <div class="ini-item" [class.turno]="c.id === combate()?.participanteDaVezId">
+              <span class="ini-num">{{ c.iniciativa }}</span>
+              <span class="ini-nome">{{ c.nome }}</span>
+              @if (c.id === combate()?.participanteDaVezId) { <span class="ini-tag">Turno</span> }
+            </div>
           }
-        </mat-list>
-        <div class="row">
-          <button mat-flat-button color="primary" (click)="proximoTurno()">Proximo turno</button>
-          <button mat-stroked-button (click)="encerrarCombate()">Encerrar combate</button>
         </div>
+        <button mat-flat-button class="full-width" (click)="proximoTurno()">Próximo turno</button>
+        <button mat-button class="full-width" (click)="encerrarCombate()">Encerrar</button>
       } @else {
-        <form [formGroup]="formCombatente" (ngSubmit)="adicionarCombatente()" class="row">
-          <mat-form-field style="flex: 2">
-            <mat-label>Combatente</mat-label>
-            <input matInput formControlName="nome" />
-          </mat-form-field>
-          <mat-form-field style="flex: 1">
-            <mat-label>Iniciativa</mat-label>
-            <input matInput type="number" formControlName="iniciativa" />
-          </mat-form-field>
-          <button mat-icon-button type="submit" [disabled]="formCombatente.invalid">
-            <mat-icon>add</mat-icon>
-          </button>
+        <form [formGroup]="formCombatente" (ngSubmit)="adicionarCombatente()" class="comb-form">
+          <mat-form-field appearance="fill"><mat-label>Combatente</mat-label>
+            <input matInput formControlName="nome" /></mat-form-field>
+          <mat-form-field appearance="fill" class="ini-field"><mat-label>Inic.</mat-label>
+            <input matInput type="number" formControlName="iniciativa" /></mat-form-field>
+          <button mat-icon-button type="submit" [disabled]="formCombatente.invalid"><mat-icon>add</mat-icon></button>
         </form>
-        <mat-list>
-          @for (entrada of combatentes(); track $index) {
-            <mat-list-item>{{ entrada.nome }} — {{ entrada.iniciativa }}</mat-list-item>
-          }
-        </mat-list>
+        @for (e of combatentes(); track $index) {
+          <div class="ini-item"><span class="ini-num">{{ e.iniciativa }}</span><span class="ini-nome">{{ e.nome }}</span></div>
+        }
         @if (combatentes().length > 0) {
-          <button mat-flat-button color="accent" (click)="iniciarCombate()">Iniciar combate</button>
+          <button mat-flat-button class="full-width" (click)="iniciarCombate()">Iniciar combate</button>
         }
       }
-    </mat-card-content>
-  </mat-card>
+    </mat-card>
+  </aside>
+
+  <section class="palco">
+    <div class="cronica scroll-area">
+      @for (m of mensagens(); track m.id) {
+        @if (m.tipo === 'SISTEMA') {
+          <div class="sys">— {{ m.conteudo }} —</div>
+        } @else {
+          <div class="msg">
+            <div class="msg-cab"><span class="msg-autor">{{ m.autorNome }}</span><span class="msg-hora">{{ hora(m.criadoEm) }}</span></div>
+            <div class="msg-txt">{{ m.conteudo }}</div>
+          </div>
+        }
+      }
+
+      @for (r of rolagens(); track r.id) {
+        <div class="roll-card" [class.secreta]="r.secreta">
+          <div class="rc-info">
+            <div class="rc-cab">
+              <span class="rc-autor">{{ r.autorNome }}</span>
+              @if (r.secreta) { <span class="rc-badge">Só o mestre</span> }
+              <span class="rc-notacao mono">{{ r.notacao }}</span>
+            </div>
+            <div class="rc-detalhe mono">
+              {{ r.notacao }} [{{ r.resultados.join(', ') }}]@if (r.modificador !== 0) { {{ r.modificador > 0 ? ' + ' : ' - ' }}{{ abs(r.modificador) }} }
+            </div>
+            @if (r.motivo) { <div class="rc-motivo">{{ r.motivo }}</div> }
+          </div>
+          <div class="rc-total">{{ r.total }}</div>
+        </div>
+      }
+    </div>
+
+    <div class="barra">
+      <form [formGroup]="formRolagem" (ngSubmit)="rolar()" class="dados-linha">
+        <span class="rot-inline">Dados</span>
+        <mat-form-field appearance="fill" class="dado-campo">
+          <input matInput formControlName="notacao" placeholder="1d20+6" />
+        </mat-form-field>
+        <button mat-flat-button [disabled]="formRolagem.invalid">Rolar</button>
+        <mat-checkbox formControlName="secreta">Secreta</mat-checkbox>
+      </form>
+
+      <form [formGroup]="formMensagem" (ngSubmit)="enviarMensagem()" class="chat-linha">
+        <mat-form-field appearance="fill" class="full-width">
+          <input matInput formControlName="conteudo" placeholder="Fale com a mesa..." />
+        </mat-form-field>
+        <button mat-flat-button class="enviar" [disabled]="formMensagem.invalid"><mat-icon>arrow_forward</mat-icon></button>
+      </form>
+    </div>
+  </section>
 </div>

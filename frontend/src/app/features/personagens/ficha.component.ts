@@ -1,13 +1,12 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatListModule } from '@angular/material/list';
 import { PersonagemService } from '../../core/services/personagem.service';
 import { Personagem, PersonagemRequest } from '../../core/models/personagem.model';
 
@@ -16,15 +15,16 @@ import { Personagem, PersonagemRequest } from '../../core/models/personagem.mode
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    RouterLink,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatCheckboxModule,
-    MatListModule
+    MatCheckboxModule
   ],
-  templateUrl: './ficha.component.html'
+  templateUrl: './ficha.component.html',
+  styleUrl: './ficha.component.scss'
 })
 export class FichaComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
@@ -188,5 +188,30 @@ export class FichaComponent implements OnInit {
 
   excluir(personagem: Personagem): void {
     this.personagemService.excluir(personagem.id).subscribe(() => this.carregar());
+  }
+
+  excluirAtual(): void {
+    const id = this.editandoId();
+    if (!id) {
+      return;
+    }
+    this.personagemService.excluir(id).subscribe(() => {
+      this.novo();
+      this.carregar();
+    });
+  }
+
+  modificador(valor: number): string {
+    const mod = Math.floor((valor - 10) / 2);
+    return mod >= 0 ? `+${mod}` : `${mod}`;
+  }
+
+  hpPercentual(): number {
+    const atual = Number(this.form.get('pvAtual')?.value ?? 0);
+    const maximo = Number(this.form.get('pvMaximo')?.value ?? 0);
+    if (maximo <= 0) {
+      return 0;
+    }
+    return Math.max(0, Math.min(100, Math.round((atual / maximo) * 100)));
   }
 }

@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🍺 TavernaOnline
+<img src="docs/banner.png" alt="TavernaOnline — Sua mesa de RPG, sem limites" width="100%">
 
 ### Mesa virtual para sessões de RPG de mesa, em tempo real
 
@@ -25,6 +25,8 @@ O **TavernaOnline** é uma aplicação full-stack que simula uma mesa de RPG onl
 ---
 
 ## 🖼️ Demonstração
+
+> Interface **"Reino das Bandeiras Vermelhas"**: quase-preto com carmesim de dragão, títulos em Cinzel e UI em Inter. Login em split-screen, salão de campanhas com selo de convite, ficha de personagem com barra de vida e perícias, e a sala ao vivo com tracker de iniciativa e cartões de rolagem (as secretas visíveis só para o mestre).
 
 <div align="center">
 
@@ -64,7 +66,7 @@ O **TavernaOnline** é uma aplicação full-stack que simula uma mesa de RPG onl
 | **Backend** | Java 21, Spring Boot 3, Spring Data JPA, Spring Security + JWT, Bean Validation, MapStruct, Flyway |
 | **Banco** | PostgreSQL 16 |
 | **Tempo real** | WebSocket + STOMP |
-| **Frontend** | Angular 18 (standalone components), Angular Material, Reactive Forms, `@stomp/stompjs` |
+| **Frontend** | Angular 18 (standalone components), Angular Material (tema real customizado), Reactive Forms, `@stomp/stompjs` |
 | **Testes** | JUnit 5, Mockito, Jasmine/Karma |
 | **Infra** | GitHub Actions (CI com PostgreSQL de serviço) |
 

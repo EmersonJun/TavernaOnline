@@ -1,97 +1,126 @@
-<div class="row">
-  <mat-card style="flex: 1 1 320px">
-    <mat-card-header><mat-card-title>Nova campanha</mat-card-title></mat-card-header>
-    <mat-card-content>
+<div class="topo">
+  <div>
+    <div class="eyebrow">Salão de Aventuras</div>
+    <h1 class="page-title">Minhas campanhas</h1>
+  </div>
+  <button mat-flat-button (click)="toggleForm()">
+    <mat-icon>add</mat-icon> Criar campanha
+  </button>
+</div>
+
+@if (mostrarForm()) {
+  <mat-card class="form-card">
+    <div class="form-cols">
       <form [formGroup]="formCriar" (ngSubmit)="criar()">
-        <mat-form-field class="full-width">
+        <h3>Nova campanha</h3>
+        <mat-form-field class="full-width" appearance="fill">
           <mat-label>Nome</mat-label>
           <input matInput formControlName="nome" />
         </mat-form-field>
-        <mat-form-field class="full-width">
+        <mat-form-field class="full-width" appearance="fill">
           <mat-label>Sistema</mat-label>
-          <input matInput formControlName="sistema" placeholder="D&D 5e, Tormenta20..." />
+          <input matInput formControlName="sistema" placeholder="d20 · Tormenta, D&D 5e..." />
         </mat-form-field>
-        <mat-form-field class="full-width">
-          <mat-label>Descricao</mat-label>
+        <mat-form-field class="full-width" appearance="fill">
+          <mat-label>Descrição</mat-label>
           <textarea matInput formControlName="descricao" rows="2"></textarea>
         </mat-form-field>
-        <button mat-flat-button color="primary" [disabled]="formCriar.invalid">Criar</button>
+        <button mat-flat-button [disabled]="formCriar.invalid">Criar</button>
       </form>
-    </mat-card-content>
-  </mat-card>
-
-  <mat-card style="flex: 1 1 320px">
-    <mat-card-header><mat-card-title>Entrar por convite</mat-card-title></mat-card-header>
-    <mat-card-content>
+      <div class="vsep"></div>
       <form [formGroup]="formEntrar" (ngSubmit)="entrar()">
-        <mat-form-field class="full-width">
-          <mat-label>Codigo de convite</mat-label>
+        <h3>Entrar por convite</h3>
+        <mat-form-field class="full-width" appearance="fill">
+          <mat-label>Código de convite</mat-label>
           <input matInput formControlName="codigoConvite" maxlength="8" style="text-transform: uppercase" />
         </mat-form-field>
-        <button mat-flat-button color="accent" [disabled]="formEntrar.invalid">Entrar</button>
+        <button mat-stroked-button [disabled]="formEntrar.invalid">Sentar à mesa</button>
       </form>
-    </mat-card-content>
+    </div>
   </mat-card>
-</div>
-
-<h2>Minhas campanhas</h2>
-
-@if (campanhas().length === 0) {
-  <p>Voce ainda nao participa de nenhuma campanha.</p>
 }
 
-@for (campanha of campanhas(); track campanha.id) {
-  <mat-card style="margin-bottom: 16px">
-    <mat-card-header>
-      <mat-card-title>{{ campanha.nome }}</mat-card-title>
-      <mat-card-subtitle>
-        {{ campanha.sistema }}
-        <mat-chip-set><mat-chip>{{ campanha.meuPapel }}</mat-chip></mat-chip-set>
-      </mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      @if (campanha.descricao) {
-        <p>{{ campanha.descricao }}</p>
-      }
-      @if (campanha.meuPapel === 'MESTRE') {
-        <p>Codigo de convite: <strong>{{ campanha.codigoConvite }}</strong></p>
-      }
+@if (destaque(); as c) {
+  <mat-card class="destaque">
+    <div class="d-info">
+      <div class="d-head">
+        @if (sessoesDestaque().length && sessoesDestaque()[sessoesDestaque().length - 1].status === 'EM_ANDAMENTO') {
+          <span class="pill red"><span class="dot dot-red"></span> Sessão ao vivo</span>
+        } @else {
+          <span class="pill green"><span class="dot dot-green"></span> Ativa</span>
+        }
+        <span class="badge">{{ c.meuPapel }}</span>
+      </div>
+      <h2 class="d-title">{{ c.nome }}</h2>
+      <p class="d-desc">{{ c.descricao || 'Uma campanha à espera de heróis.' }}</p>
 
-      <mat-accordion>
-        <mat-expansion-panel (opened)="carregarSessoes(campanha.id)">
-          <mat-expansion-panel-header>
-            <mat-panel-title>Sessoes</mat-panel-title>
-          </mat-expansion-panel-header>
-
-          @if (campanha.meuPapel === 'MESTRE') {
-            <form [formGroup]="formSessao" (ngSubmit)="criarSessao(campanha.id)" class="row">
-              <mat-form-field style="flex: 1">
-                <mat-label>Titulo da sessao</mat-label>
-                <input matInput formControlName="titulo" />
-              </mat-form-field>
-              <button mat-stroked-button [disabled]="formSessao.invalid">Criar sessao</button>
-            </form>
-          }
-
-          <mat-list>
-            @for (sessao of sessoesDe(campanha.id); track sessao.id) {
-              <mat-list-item>
-                <span matListItemTitle>#{{ sessao.numero }} — {{ sessao.titulo }}</span>
-                <span matListItemLine>{{ sessao.status }}</span>
-                <a mat-button color="primary" [routerLink]="['/sessoes', sessao.id, 'sala']">Entrar na sala</a>
-              </mat-list-item>
+      <div class="d-stats">
+        <div>
+          <div class="eyebrow">Aventureiros</div>
+          <div class="avatares">
+            @for (p of participantesDestaque().slice(0, 3); track p.usuarioId) {
+              <span class="av">{{ iniciais(p.nome) }}</span>
             }
-          </mat-list>
-        </mat-expansion-panel>
-      </mat-accordion>
-    </mat-card-content>
-    <mat-card-actions>
-      <a mat-button [routerLink]="['/campanhas', campanha.id, 'personagens']">
-        <mat-icon>person</mat-icon> Fichas
-      </a>
-      <a mat-button [routerLink]="['/campanhas', campanha.id, 'diario']">
-        <mat-icon>menu_book</mat-icon> Diario
-      </a>
-    </mat-card-actions>
+            @if (participantesDestaque().length > 3) {
+              <span class="av mais">+{{ participantesDestaque().length - 3 }}</span>
+            }
+          </div>
+        </div>
+        <div>
+          <div class="eyebrow">Sessões jogadas</div>
+          <div class="stat-num">{{ sessoesDestaque().length }}</div>
+        </div>
+        <div>
+          <div class="eyebrow">Sistema</div>
+          <div class="stat-txt">{{ c.sistema }}</div>
+        </div>
+      </div>
+
+      <div class="d-acoes">
+        <button mat-flat-button (click)="abrirSala(c)">Abrir a sala</button>
+        <button mat-stroked-button (click)="verFichas(c)">Ver fichas</button>
+        <button mat-button (click)="abrirDiario(c)">Diário</button>
+      </div>
+    </div>
+
+    @if (c.meuPapel === 'MESTRE') {
+      <div class="d-convite">
+        <div class="eyebrow">Código de convite</div>
+        <div class="seal">{{ c.codigoConvite }}</div>
+        <p class="conv-txt">Partilhe com quem vai sentar à mesa. Oito caracteres, uma campanha.</p>
+        <button mat-stroked-button (click)="copiarCodigo(c.codigoConvite)">Copiar código</button>
+      </div>
+    } @else {
+      <div class="d-convite">
+        <div class="eyebrow">Mesa</div>
+        <div class="seal seal-quiet">{{ c.sistema }}</div>
+        <p class="conv-txt">Você está nesta campanha como jogador. Boa sorte, aventureiro.</p>
+      </div>
+    }
   </mat-card>
 }
+
+<div class="grade">
+  @for (c of outras(); track c.id) {
+    <mat-card class="mini" (click)="verFichas(c)">
+      <div class="mini-head">
+        <span class="badge">{{ c.meuPapel }}</span>
+        <span class="pill">{{ c.ativa ? 'Ativa' : 'Pausada' }}</span>
+      </div>
+      <h3 class="mini-title">{{ c.nome }}</h3>
+      <p class="mini-desc">{{ c.descricao || 'Sem descrição.' }}</p>
+      <div class="mini-foot">
+        <span class="muted">{{ c.sistema }}</span>
+        @if (c.meuPapel === 'MESTRE') {
+          <span class="mini-code mono">{{ c.codigoConvite }}</span>
+        }
+      </div>
+    </mat-card>
+  }
+
+  <div class="nova" (click)="toggleForm()">
+    <span class="mais-ico">+</span>
+    <div class="nova-txt">Nova campanha</div>
+    <div class="muted">ou entrar por código</div>
+  </div>
+</div>

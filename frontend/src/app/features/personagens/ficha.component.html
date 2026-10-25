@@ -1,119 +1,126 @@
-<div class="row">
-  <mat-card style="flex: 2 1 420px">
-    <mat-card-header>
-      <mat-card-title>{{ editandoId() ? 'Editar ficha' : 'Nova ficha' }}</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <form [formGroup]="form" (ngSubmit)="salvar()">
-        <mat-form-field class="full-width">
-          <mat-label>Nome</mat-label>
-          <input matInput formControlName="nome" />
-        </mat-form-field>
-
-        <div class="row">
-          <mat-form-field style="flex: 1">
-            <mat-label>Classe</mat-label>
-            <input matInput formControlName="classe" />
-          </mat-form-field>
-          <mat-form-field style="flex: 1">
-            <mat-label>Raca</mat-label>
-            <input matInput formControlName="raca" />
-          </mat-form-field>
-        </div>
-
-        <div class="row">
-          <mat-form-field style="flex: 1">
-            <mat-label>Nivel</mat-label>
-            <input matInput type="number" formControlName="nivel" />
-          </mat-form-field>
-          <mat-form-field style="flex: 1">
-            <mat-label>PV atual</mat-label>
-            <input matInput type="number" formControlName="pvAtual" />
-          </mat-form-field>
-          <mat-form-field style="flex: 1">
-            <mat-label>PV maximo</mat-label>
-            <input matInput type="number" formControlName="pvMaximo" />
-          </mat-form-field>
-          <mat-form-field style="flex: 1">
-            <mat-label>CA</mat-label>
-            <input matInput type="number" formControlName="classeArmadura" />
-          </mat-form-field>
-        </div>
-
-        <h3>Atributos</h3>
-        <div class="row" formGroupName="atributos">
-          <mat-form-field style="flex: 1"><mat-label>FOR</mat-label>
-            <input matInput type="number" formControlName="forca" /></mat-form-field>
-          <mat-form-field style="flex: 1"><mat-label>DES</mat-label>
-            <input matInput type="number" formControlName="destreza" /></mat-form-field>
-          <mat-form-field style="flex: 1"><mat-label>CON</mat-label>
-            <input matInput type="number" formControlName="constituicao" /></mat-form-field>
-          <mat-form-field style="flex: 1"><mat-label>INT</mat-label>
-            <input matInput type="number" formControlName="inteligencia" /></mat-form-field>
-          <mat-form-field style="flex: 1"><mat-label>SAB</mat-label>
-            <input matInput type="number" formControlName="sabedoria" /></mat-form-field>
-          <mat-form-field style="flex: 1"><mat-label>CAR</mat-label>
-            <input matInput type="number" formControlName="carisma" /></mat-form-field>
-        </div>
-
-        <h3>Pericias <button mat-icon-button type="button" (click)="adicionarPericia()">
-          <mat-icon>add</mat-icon></button></h3>
-        <div formArrayName="pericias">
-          @for (grupo of pericias.controls; track $index) {
-            <div class="row" [formGroupName]="$index">
-              <mat-form-field style="flex: 2"><mat-label>Nome</mat-label>
-                <input matInput formControlName="nome" /></mat-form-field>
-              <mat-form-field style="flex: 1"><mat-label>Bonus</mat-label>
-                <input matInput type="number" formControlName="bonus" /></mat-form-field>
-              <mat-checkbox formControlName="proficiente">Proficiente</mat-checkbox>
-              <button mat-icon-button type="button" (click)="removerPericia($index)">
-                <mat-icon>delete</mat-icon></button>
-            </div>
-          }
-        </div>
-
-        <h3>Inventario <button mat-icon-button type="button" (click)="adicionarItem()">
-          <mat-icon>add</mat-icon></button></h3>
-        <div formArrayName="inventario">
-          @for (grupo of inventario.controls; track $index) {
-            <div class="row" [formGroupName]="$index">
-              <mat-form-field style="flex: 2"><mat-label>Item</mat-label>
-                <input matInput formControlName="nome" /></mat-form-field>
-              <mat-form-field style="flex: 1"><mat-label>Qtd</mat-label>
-                <input matInput type="number" formControlName="quantidade" /></mat-form-field>
-              <mat-form-field style="flex: 1"><mat-label>Peso</mat-label>
-                <input matInput type="number" formControlName="peso" /></mat-form-field>
-              <button mat-icon-button type="button" (click)="removerItem($index)">
-                <mat-icon>delete</mat-icon></button>
-            </div>
-          }
-        </div>
-
-        <div class="row">
-          <button mat-flat-button color="primary" [disabled]="form.invalid">Salvar</button>
-          @if (editandoId()) {
-            <button mat-button type="button" (click)="novo()">Cancelar edicao</button>
-          }
-        </div>
-      </form>
-    </mat-card-content>
-  </mat-card>
-
-  <mat-card style="flex: 1 1 280px">
-    <mat-card-header><mat-card-title>Fichas da campanha</mat-card-title></mat-card-header>
-    <mat-card-content>
-      <mat-list>
-        @for (personagem of personagens(); track personagem.id) {
-          <mat-list-item>
-            <span matListItemTitle>{{ personagem.nome }}</span>
-            <span matListItemLine>
-              Nivel {{ personagem.nivel }} — PV {{ personagem.pvAtual }}/{{ personagem.pvMaximo }}
-            </span>
-            <button mat-icon-button (click)="editar(personagem)"><mat-icon>edit</mat-icon></button>
-            <button mat-icon-button (click)="excluir(personagem)"><mat-icon>delete</mat-icon></button>
-          </mat-list-item>
-        }
-      </mat-list>
-    </mat-card-content>
-  </mat-card>
+<div class="breadcrumb">
+  <a class="voltar" routerLink="/campanhas"><mat-icon>chevron_left</mat-icon></a>
+  <span class="muted">Ficha de personagem</span>
+  <span class="spacer"></span>
+  <button mat-button (click)="novo()">Nova ficha</button>
 </div>
+
+@if (personagens().length) {
+  <div class="seletor">
+    @for (p of personagens(); track p.id) {
+      <button class="chip-pers" [class.ativo]="editandoId() === p.id" (click)="editar(p)">
+        {{ p.nome }}
+      </button>
+    }
+  </div>
+}
+
+<form [formGroup]="form">
+  <mat-card class="cab">
+    <span class="crest">
+      <svg width="40" height="46" viewBox="0 0 40 46" fill="none">
+        <path d="M20 2 36 7v14c0 10-6.5 16.5-16 20C10.5 37.5 4 31 4 21V7L20 2Z" fill="#161619" stroke="#d8283c" stroke-width="2"/>
+        <path d="M20 14l2.4 5h5.1l-4.1 3.3 1.5 5.1L20 24.2 15.1 27.4l1.5-5.1L12.5 19h5.1L20 14Z" fill="#d8283c"/>
+      </svg>
+    </span>
+    <div class="cab-info">
+      <div class="cab-sub">
+        <input class="inp-inline eyebrow-inp" formControlName="classe" placeholder="CLASSE" />
+        <span class="muted">· Nível</span>
+        <input class="inp-inline nivel-inp" type="number" formControlName="nivel" />
+      </div>
+      <input class="inp-nome" formControlName="nome" placeholder="Nome do personagem" />
+      <input class="inp-raca" formControlName="raca" placeholder="Raça · origem · guilda" />
+    </div>
+    <div class="cab-boxes">
+      <div class="cab-box"><div class="cb-lbl">CA</div><input class="cb-val" type="number" formControlName="classeArmadura" /></div>
+      <div class="cab-box"><div class="cb-lbl">PV</div><div class="cb-val">{{ form.get('pvAtual')?.value }}</div></div>
+    </div>
+  </mat-card>
+
+  <div class="sheet">
+    <div class="coluna">
+      <mat-card class="box">
+        <div class="eyebrow">Atributos</div>
+        <div class="attrs" formGroupName="atributos">
+          <div class="attr"><div class="at-lbl">FOR</div>
+            <input class="at-val" type="number" formControlName="forca" />
+            <span class="at-mod">{{ modificador(form.get('atributos.forca')?.value) }}</span></div>
+          <div class="attr"><div class="at-lbl">DES</div>
+            <input class="at-val" type="number" formControlName="destreza" />
+            <span class="at-mod">{{ modificador(form.get('atributos.destreza')?.value) }}</span></div>
+          <div class="attr"><div class="at-lbl">CON</div>
+            <input class="at-val" type="number" formControlName="constituicao" />
+            <span class="at-mod">{{ modificador(form.get('atributos.constituicao')?.value) }}</span></div>
+          <div class="attr"><div class="at-lbl">INT</div>
+            <input class="at-val" type="number" formControlName="inteligencia" />
+            <span class="at-mod">{{ modificador(form.get('atributos.inteligencia')?.value) }}</span></div>
+          <div class="attr"><div class="at-lbl">SAB</div>
+            <input class="at-val" type="number" formControlName="sabedoria" />
+            <span class="at-mod">{{ modificador(form.get('atributos.sabedoria')?.value) }}</span></div>
+          <div class="attr"><div class="at-lbl">CAR</div>
+            <input class="at-val" type="number" formControlName="carisma" />
+            <span class="at-mod">{{ modificador(form.get('atributos.carisma')?.value) }}</span></div>
+        </div>
+      </mat-card>
+
+      <mat-card class="box">
+        <div class="hp-head">
+          <span class="eyebrow">Pontos de vida</span>
+          <span class="hp-num"><strong class="red-text">{{ form.get('pvAtual')?.value }}</strong> / {{ form.get('pvMaximo')?.value }}</span>
+        </div>
+        <div class="hp-track"><div class="hp-fill" [style.width.%]="hpPercentual()"></div></div>
+        <div class="hp-campos">
+          <div class="hp-campo"><div class="hc-lbl">PV atual</div><input type="number" formControlName="pvAtual" /></div>
+          <div class="hp-campo"><div class="hc-lbl">PV máximo</div><input type="number" formControlName="pvMaximo" /></div>
+        </div>
+      </mat-card>
+    </div>
+
+    <div class="coluna">
+      <mat-card class="box">
+        <div class="box-top"><span class="eyebrow">Perícias</span>
+          <button mat-button type="button" (click)="adicionarPericia()">+ Adicionar</button></div>
+        <div class="pericias" formArrayName="pericias">
+          @for (g of pericias.controls; track $index) {
+            <div class="pericia" [formGroupName]="$index">
+              <label class="radio-dot" [class.on]="g.get('proficiente')?.value">
+                <input type="checkbox" formControlName="proficiente" hidden />
+                <span></span>
+              </label>
+              <input class="pe-nome" formControlName="nome" placeholder="Perícia" />
+              <input class="pe-bonus" type="number" formControlName="bonus" />
+              <button mat-icon-button type="button" (click)="removerPericia($index)"><mat-icon>close</mat-icon></button>
+            </div>
+          }
+          @if (pericias.controls.length === 0) { <p class="muted">Nenhuma perícia ainda.</p> }
+        </div>
+      </mat-card>
+
+      <mat-card class="box">
+        <div class="box-top"><span class="eyebrow">Inventário</span>
+          <button mat-button type="button" (click)="adicionarItem()">+ Adicionar</button></div>
+        <div class="inv" formArrayName="inventario">
+          @for (g of inventario.controls; track $index) {
+            <div class="item" [formGroupName]="$index">
+              <span class="it-ico"><mat-icon>inventory_2</mat-icon></span>
+              <input class="it-nome" formControlName="nome" placeholder="Item" />
+              <input class="it-peso" type="number" formControlName="peso" placeholder="Peso" />
+              <input class="it-qtd" type="number" formControlName="quantidade" />
+              <button mat-icon-button type="button" (click)="removerItem($index)"><mat-icon>close</mat-icon></button>
+            </div>
+          }
+          @if (inventario.controls.length === 0) { <p class="muted">Inventário vazio.</p> }
+        </div>
+      </mat-card>
+    </div>
+  </div>
+
+  <div class="acoes">
+    <button mat-flat-button (click)="salvar()" [disabled]="form.invalid">Salvar ficha</button>
+    @if (editandoId()) {
+      <button mat-stroked-button type="button" (click)="novo()">Cancelar</button>
+      <button mat-button type="button" class="excluir" (click)="excluirAtual()">Excluir</button>
+    }
+  </div>
+</form>
